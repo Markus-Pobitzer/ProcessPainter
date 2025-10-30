@@ -1,0 +1,90 @@
+# animation-1
+- domain_lora_scale: 1.0
+  lora_model_path: ""
+  dreambooth_path:   ""
+  adapter_lora_path: ""
+  adapter_lora_scale: 1.0
+  ipa_path: ""
+  lora_alpha: 0.6
+
+  inference_config: "configs/inference/inference.yaml"
+  motion_module:    "models/Motion_with_LoRA/style1.ckpt"
+
+  # seed: 2
+  steps: 50
+  guidance_scale: 5
+
+  controlnet_images:
+    - "data/validation_frames/circle"
+    - "data/validation_frames/girl"
+    - "data/validation_frames/man"
+    - "data/validation_frames/mother"
+    - "data/validation_frames/moutain"
+    - "data/validation_frames/pray"
+  controlnet_conditioning_scale: 1
+  
+  prompt:
+    # - A boy and a girl sitting by a campfire, their eyes meeting in the flickering light.
+    # - A boy and a girl watching the clouds, lying on the lawn and gazing at each other.
+    # - A boy and a girl playing catch, sharing a look after every throw.
+    # - A boy and a girl lying on the lawn, gazing up at the starry sky.
+    # - A boy and a girl sitting on the grass, looking up at the stars.
+    # - A boy and a girl lying side by side on the lawn, admiring the constellations.
+    # - A boy and a girl holding hands on the grass, staring at the night sky.
+    # - A boy and a girl lying on a blanket on the lawn, marveling at the stars.
+    # - A boy and a girl with their backs on the grass, pointing at the stars.
+    # - A boy and a girl lying close together on the lawn, watching the twinkling stars.
+    # - A boy and a girl sitting under a tree, gazing up at the star-filled sky.
+    # - A boy and a girl lying head-to-head on the grass, immersed in the starry view.
+    # - A boy and a girl sitting on the lawn, whispering under the stars.
+    # - A boy and a girl lying on the grass, lost in the vastness of the night sky.
+    # - A boy and a girl wrapped in a blanket on the lawn, watching shooting stars.
+    # - A boy and a girl lying on the grass, finding constellations in the sky.
+    # - A boy and a girl sitting on the lawn, sharing dreams under the stars.
+    # - A boy and a girl on the grass, mesmerized by the celestial display above.
+    # - A boy and a girl lying back on the lawn, counting stars together.
+    # - A boy and a girl on the grass, making wishes upon the stars.
+    # - A boy and a girl lying on the lawn, silently enjoying the night sky.
+    # - A boy and a girl holding hands on the grass, captivated by the stars.
+    # - A boy and a girl lying on the grass, dreaming under the starry sky.
+    - "A bridge spans a river with a city skyline in the background"
+    - "A wooden house in front of a field of flowers with green mountains in the distance"
+    - "A sunrise in a valley with sunlight shining through a rock arch"
+    - "An ancient stone archway in a ruin with a deer standing in the foreground."
+    - "A red brick house with a black roof, and a cat sitting on the porch."
+    - "A small white house with blue shutters, and a dog playing in the front yard."
+    - "A modern house with large glass windows, and birds nesting on the roof."
+    - "A cozy cottage with a thatched roof, and a rabbit hopping nearby."
+    - "A tall, narrow house painted yellow, with a squirrel climbing a tree next to it."
+    - "A bungalow with a green lawn, and ducks swimming in a small pond in front."
+    - "A two-story house with a large balcony, and a parrot perched on the railing."
+    - "A wooden cabin in the woods, with deer grazing nearby."
+    - "A houseboat anchored by the shore, with fish swimming around it."
+    - "A Victorian-style house with ornate details, and a peacock strutting in the garden."
+    - "A beach house on stilts, with seagulls flying overhead."
+    - "A farmhouse with a barn, and chickens pecking in the yard."
+    - "A mansion with tall gates, and horses grazing in the pasture."
+    - "A minimalist house with a flat roof, and a turtle slowly crossing the driveway."
+    - "A stone house with ivy climbing the walls, and a fox sneaking around."
+    - "A treehouse high up in a large oak tree, with squirrels scurrying about."
+    - "A suburban house with a neat lawn, and a hedgehog exploring the flowerbeds."
+    - "A log cabin near a lake, with a bear fishing in the water."
+    - "A quaint house with a picket fence, and a butterfly garden attracting bees."
+    - "A townhouse with a small front yard, and a raccoon rummaging through the trash."
+    - "A desert house with a cactus garden, and a lizard basking in the sun."
+    - "A Mediterranean-style villa with a courtyard, and a goat grazing nearby."
+    - "A colonial house with large columns, and a cow lying in the shade."
+    - "A glass house with a beautiful view, and a family of ducks waddling by."
+    - "A mountain chalet with a snowy roof, and a lynx prowling around."
+    - "A bamboo house in a tropical setting, with monkeys swinging from the trees."
+    - "A tiny house on wheels, with a sheep grazing beside it."
+    - "A modern apartment building, with pigeons perched on the ledge."
+    - "A retro house with a funky design, and a chameleon blending into the background."
+    - "A house with solar panels on the roof, and a rabbit hole in the garden."
+    
+
+  n_prompt:
+    - "worst quality, low quality, letterboxed, watermarked"
+
+  ddim: false
+  sample_size: 512
