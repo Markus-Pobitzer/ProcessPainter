@@ -21,3 +21,4 @@ dependencies:
     - safetensors
     - gradio
     - wandb
+    - mkl==2022.2.1
