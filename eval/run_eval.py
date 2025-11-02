@@ -13,6 +13,7 @@ from tqdm import tqdm
 from eval.img_utils import pil_resize, undo_pil_resize
 from io import BytesIO
 import pickle
+import glob
 
 
 def process_images(input_path, output_path, controlnet_image_index: int = 7, width: int = 512, height: int = 512) -> List[Dict[str, Any]]:
@@ -56,7 +57,33 @@ def process_images(input_path, output_path, controlnet_image_index: int = 7, wid
     print(f"Prepared {len(ret_list)} number of images for ProcessPainter inference, saved to {output_path}")
 
     return ret_list
-    
+
+def get_latest_sample_subdirs(base_path="samples"):
+    # Find all subdirectories under samples/*/
+    sample_dirs = sorted(glob.glob(os.path.join(base_path, "*/")))
+
+    if not sample_dirs:
+        print("No directories found under 'samples/*/'.")
+        return []
+
+    if len(sample_dirs) > 1:
+        print("Multiple directories found under 'samples/*/':")
+        for d in sample_dirs:
+            print(f" - {d}")
+        print("Selecting the last one (sorted).")
+
+    # Select the last one
+    selected_dir = sample_dirs[-1]
+
+    # List all subdirectories under the selected directory
+    subdirs = [
+        os.path.join(selected_dir, name)
+        for name in os.listdir(selected_dir)
+        if os.path.isdir(os.path.join(selected_dir, name))
+    ]
+
+    return subdirs
+
 def run_eval(args):
     input_directory=args.input_directory
     output_directory=args.output_directory
@@ -104,7 +131,7 @@ def run_eval(args):
     shutil.rmtree("samples", ignore_errors=True)
     animate_main(args=args)
     
-    sample_dir_list = []
+    sample_dir_list = get_latest_sample_subdirs()
     processed = 0
     for sample_dir, frame_dict in zip(sample_dir_list, frame_list_dict):
         image_files = [f for f in os.listdir(sample_dir) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
@@ -148,7 +175,7 @@ def run_eval(args):
             pickle.dump(progress_steps_list, fp, protocol=pickle.HIGHEST_PROTOCOL)
 
         processed += 1
-    print(f"Successfuly processed {processed} samples.")
+    print(f"Successfuly processed {processed} samples and saved them under {str(video_out)}.")
     
 
     
