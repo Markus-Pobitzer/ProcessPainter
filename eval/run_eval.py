@@ -59,7 +59,7 @@ def run_eval(args):
     tmp_dataset_path = Path(temp_dir, split, "dataset")
     tmp_config_path = Path(temp_dir, split, "config.yaml")
     # Clean it just to make sure
-    shutil.rmtree(tmp_dataset_path)
+    shutil.rmtree(tmp_dataset_path, ignore_errors=True)
     tmp_dataset_path.mkdir(parents=True, exist_ok=True)
     frame_list_dict = process_images(str(input_path), str(tmp_dataset_path), controlnet_image_index)
     tagger = Predictor()
@@ -89,7 +89,7 @@ def run_eval(args):
     
     # Actual inference
     # It saves it under "samples/*/" therefore clean the directory first
-    shutil.rmtree("samples")
+    shutil.rmtree("samples", ignore_errors=True)
     animate_main(args=args)
     
     
