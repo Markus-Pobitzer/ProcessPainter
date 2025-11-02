@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import List, Dict, Any
 import shutil
 from PIL import Image
-from wd_tagger import Predictor
+from eval.wd_tagger import Predictor
 from omegaconf import OmegaConf
 from scripts.animate import main as animate_main
 
