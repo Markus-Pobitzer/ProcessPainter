@@ -24,3 +24,4 @@ dependencies:
     - matplotlib
     - peft==0.13.0
     - accelerate==1.0.0
+    - numpy<2
