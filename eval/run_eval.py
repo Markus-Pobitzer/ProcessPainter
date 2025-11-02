@@ -73,14 +73,15 @@ def run_eval(args):
     # Prepare config
     original_config_path = args.config
     config = OmegaConf.load(original_config_path)
+    print(config)
 
     # Extract new values from frame_list_dict
     new_controlnet_images = [entry["tmp_frame_dir"] for entry in frame_list_dict]
     new_prompts = [entry["prompt"] for entry in frame_list_dict]
 
     # Update the config (assuming it's a list with one dict as in your YAML)
-    config["controlnet_images"] = new_controlnet_images
-    config["prompt"] = new_prompts
+    config[0]["controlnet_images"] = new_controlnet_images
+    config[0]["prompt"] = new_prompts
 
     # Save the updated config and overwrite args
     OmegaConf.save(config, tmp_config_path)
