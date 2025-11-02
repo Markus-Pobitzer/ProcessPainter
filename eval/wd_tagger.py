@@ -86,9 +86,16 @@ class Predictor:
         self.rating_indexes = sep_tags[1]
         self.general_indexes = sep_tags[2]
         self.character_indexes = sep_tags[3]
+        
+        
+        sess_options = rt.SessionOptions()
+        sess_options.intra_op_num_threads = 4          # disables thread affinity
+        sess_options.execution_mode = rt.ExecutionMode.ORT_SEQUENTIAL
+        sess_options.inter_op_num_threads = 1 
+
 
         del self.model
-        model = rt.InferenceSession(model_path)
+        model = rt.InferenceSession(model_path, sess_options=sess_options)
         _, height, width, _ = model.get_inputs()[0].shape
         self.model_target_size = height
 
