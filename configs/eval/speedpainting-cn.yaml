@@ -16,9 +16,9 @@
 
   controlnet_image_indexes: [7]
   controlnet_images:
-    - "/home/markus.pobitzer/data/datasets/video_as_pkl_combined/test/youtube/2jMFjnW7zJg/reference_frame.png"
-    - "/home/markus.pobitzer/data/datasets/video_as_pkl_combined/test/youtube/3C-2uedxKcs/reference_frame.png"
-    - "/home/markus.pobitzer/data/datasets/video_as_pkl_combined/test/youtube/4uMfPzeA528/reference_frame.png"
+    - "test_cn/test/youtube/2jMFjnW7zJg/"
+    - "test_cn/test/youtube/3C-2uedxKcs/"
+    - "test_cn/test/youtube/4uMfPzeA528/"
   controlnet_conditioning_scale: 1
   
   prompt:
