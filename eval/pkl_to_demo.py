@@ -25,7 +25,9 @@ def process_images(input_directory, split, output_directory, controlnet_image_in
             image_path = os.path.join(subdir_path, "reference_frame.png")
             try:
                 img = Image.open(image_path)
-                output_image_path = os.path.join(output_path, source, subdir, f"{controlnet_image_index}.jpg")
+                output_image_path = os.path.join(output_path, source, subdir)
+                os.makedirs(output_image_path, exist_ok=True)
+                output_image_path = os.join(output_image_path, f"{controlnet_image_index}.jpg")
                 img.save(output_image_path)
                 saved_paths.append(output_image_path)
             except Exception as e:
