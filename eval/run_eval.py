@@ -100,9 +100,6 @@ def run_eval(args):
     tmp_dataset_path.mkdir(parents=True, exist_ok=True)
     frame_list_dict = process_images(str(input_path), str(tmp_dataset_path), controlnet_image_index)
     tagger = Predictor()
-    
-    # TODO : REMOVE only DEBUG
-    frame_list_dict = frame_list_dict[:2]
 
     for frame_dict in tqdm(frame_list_dict, desc="tagging images"):
         img = Image.open(frame_dict["reference_frame_path"])
@@ -176,10 +173,6 @@ def run_eval(args):
 
         processed += 1
     print(f"Successfuly processed {processed} samples and saved them under {str(video_out)}.")
-    
-
-    
-    
     
 
 def main():
