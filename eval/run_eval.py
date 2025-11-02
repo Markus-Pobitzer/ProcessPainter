@@ -9,7 +9,7 @@ from PIL import Image
 from eval.wd_tagger import Predictor
 from omegaconf import OmegaConf
 from scripts.animate import main as animate_main
-import onnxruntime as ort
+from tqdm import tqdm
 
 def process_images(input_path, output_path, controlnet_image_index: int = 7) -> List[Dict[str, Any]]:
     ret_list: List[Dict[str, Any]] = []
@@ -65,7 +65,7 @@ def run_eval(args):
     frame_list_dict = process_images(str(input_path), str(tmp_dataset_path), controlnet_image_index)
     tagger = Predictor()
 
-    for frame_dict in frame_list_dict:
+    for frame_dict in tqdm(frame_list_dict, desc="tagging images"):
         img = Image.open(frame_dict["reference_frame_path"])
         tags, _, _, _ = tagger.predict(image=img)
         frame_dict["prompt"] = tags
