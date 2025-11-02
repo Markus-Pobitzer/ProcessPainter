@@ -37,6 +37,21 @@ def save_videos_grid(videos: torch.Tensor, path: str, rescale=False, n_rows=6, f
 
     os.makedirs(os.path.dirname(path), exist_ok=True)
     imageio.mimsave(path, outputs, fps=fps)
+    
+
+def save_video_frames_as_images(videos: torch.Tensor, path: str, rescale=False):
+    # Rearrange to (T, B, C, H, W)
+    videos = rearrange(videos, "b c t h w -> t b c h w")
+    
+    os.makedirs(path, exist_ok=True)
+
+    for i, frame in enumerate(videos):
+        grid = torchvision.utils.make_grid(frame, nrow=6)  # You can change nrow if needed
+        img = grid.permute(1, 2, 0)  # CHW -> HWC
+        if rescale:
+            img = (img + 1.0) / 2.0  # Normalize from [-1, 1] to [0, 1]
+        img = (img * 255).clamp(0, 255).byte().cpu().numpy()
+        Image.fromarray(img).save(os.path.join(path, f"frame_{i:04d}.png"))
 
 
 # DDIM Inversion

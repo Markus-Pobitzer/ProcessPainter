@@ -10,8 +10,12 @@ from eval.wd_tagger import Predictor
 from omegaconf import OmegaConf
 from scripts.animate import main as animate_main
 from tqdm import tqdm
+from eval.img_utils import pil_resize, undo_pil_resize
+from io import BytesIO
+import pickle
 
-def process_images(input_path, output_path, controlnet_image_index: int = 7) -> List[Dict[str, Any]]:
+
+def process_images(input_path, output_path, controlnet_image_index: int = 7, width: int = 512, height: int = 512) -> List[Dict[str, Any]]:
     ret_list: List[Dict[str, Any]] = []
 
     # Create output directory if it doesn't exist
@@ -29,7 +33,10 @@ def process_images(input_path, output_path, controlnet_image_index: int = 7) -> 
 
             image_path = os.path.join(subdir_path, "reference_frame.png")
             try:
-                img = Image.open(image_path)
+                img = Image.open(image_path).convert("RGB")
+                original_size = img.size
+                # Resize to correct size explicetly here
+                img = pil_resize(img, target_size=(width, height), pad_input=True)
                 output_image_dir = os.path.join(output_path, source, subdir)
                 os.makedirs(output_image_dir, exist_ok=True)
                 output_image_path = os.path.join(output_image_dir, f"{controlnet_image_index}.jpg")
@@ -37,6 +44,7 @@ def process_images(input_path, output_path, controlnet_image_index: int = 7) -> 
                 ret_list.append(
                     {
                         "reference_frame_path": image_path,
+                        "reference_frame_size": original_size,
                         "tmp_frame_dir": output_image_dir,
                         "tmp_frame_path": output_image_path,
                         "source": source,
@@ -56,6 +64,7 @@ def run_eval(args):
     split=args.split
     controlnet_image_index=args.controlnet_image_index
     
+    output_path = Path(output_directory, split)
     input_path = Path(input_directory, split)
     tmp_dataset_path = Path(temp_dir, split, "dataset")
     tmp_config_path = Path(temp_dir, split, "config.yaml")
@@ -64,6 +73,9 @@ def run_eval(args):
     tmp_dataset_path.mkdir(parents=True, exist_ok=True)
     frame_list_dict = process_images(str(input_path), str(tmp_dataset_path), controlnet_image_index)
     tagger = Predictor()
+    
+    # TODO : REMOVE only DEBUG
+    frame_list_dict = frame_list_dict[:2]
 
     for frame_dict in tqdm(frame_list_dict, desc="tagging images"):
         img = Image.open(frame_dict["reference_frame_path"])
@@ -73,7 +85,6 @@ def run_eval(args):
     # Prepare config
     original_config_path = args.config
     config = OmegaConf.load(original_config_path)
-    print(config)
 
     # Extract new values from frame_list_dict
     new_controlnet_images = [entry["tmp_frame_dir"] for entry in frame_list_dict]
@@ -92,6 +103,54 @@ def run_eval(args):
     # It saves it under "samples/*/" therefore clean the directory first
     shutil.rmtree("samples", ignore_errors=True)
     animate_main(args=args)
+    
+    sample_dir_list = []
+    processed = 0
+    for sample_dir, frame_dict in zip(sample_dir_list, frame_list_dict):
+        image_files = [f for f in os.listdir(sample_dir) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
+        image_files.sort()
+        images: List[Image] = []
+        for f in image_files:
+            try:
+                fp = os.path.join(sample_dir, f)
+                gen_frame = Image.open(fp).convert("RGB")
+                images.append(gen_frame)
+            except Exception as e:
+                print(f"Was not able to load frame from {fp}: {e}")
+        if len(images) < 1:
+            continue
+        # Undo resizing and padding
+        images = [undo_pil_resize(img, target_size=frame_dict["reference_frame_size"]) for img in images]
+        
+        # Save as pkl dataset
+        source = frame_dict["source"]
+        video_id = frame_dict["id"]
+        
+        image_data_list: List[bytes] = []
+        for im in images:
+            buffer = BytesIO()
+            im.save(buffer, format="PNG")
+            image_data_list.append(buffer.getvalue())
+            
+        n = len(image_data_list)
+        # --- Build progress list [0.0 .. 1.0] inclusive ---
+        if n == 1:
+            progress_steps_list = [1.0]
+        else:
+            progress_steps_list = [i / (n - 1) for i in range(n)]
+            
+        video_out = output_path / source / video_id
+        video_out.mkdir(parents=True, exist_ok=True)
+        with open(video_out / "frame_data.pkl", "wb") as fp:
+            pickle.dump(image_data_list, fp, protocol=pickle.HIGHEST_PROTOCOL)
+
+        with open(video_out / "frame_progress.pkl", "wb") as fp:
+            pickle.dump(progress_steps_list, fp, protocol=pickle.HIGHEST_PROTOCOL)
+
+        processed += 1
+    print(f"Successfuly processed {processed} samples.")
+    
+
     
     
     

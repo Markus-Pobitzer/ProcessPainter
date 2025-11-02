@@ -16,7 +16,7 @@ from transformers import CLIPTextModel, CLIPTokenizer, CLIPVisionModelWithProjec
 from animatediff.models.unet import UNet3DConditionModel
 from animatediff.models.sparse_controlnet import SparseControlNetModel
 from animatediff.pipelines.pipeline_animation import AnimationPipeline
-from animatediff.utils.util import save_videos_grid
+from animatediff.utils.util import save_videos_grid, save_video_frames_as_images
 from animatediff.utils.util import load_weights
 from animatediff.models.ipa import ImageProjModel, Resampler
 from animatediff.models.ipa import is_torch2_available
@@ -194,13 +194,15 @@ def main(args):
             samples.append(sample)
 
             prompt = "-".join((prompt.replace("/", "").split(" ")[:10]))
-            save_videos_grid(sample, f"{savedir}/sample/{sample_idx}-{prompt}.gif")
-            print(f"save to {savedir}/sample/{prompt}.gif")
+            save_video_frames_as_images(sample, f"{savedir}/{sample_idx}-{prompt}" )
+            print(f"{savedir}/{sample_idx}-{prompt}")
+            # save_videos_grid(sample, f"{savedir}/sample/{sample_idx}-{prompt}.gif")
+            # print(f"save to {savedir}/sample/{prompt}.gif")
             
             sample_idx += 1
 
     samples = torch.concat(samples)
-    save_videos_grid(samples, f"{savedir}/sample.gif", n_rows=10)
+    # save_videos_grid(samples, f"{savedir}/sample.gif", n_rows=10)
 
     OmegaConf.save(config, f"{savedir}/config.yaml")
 
