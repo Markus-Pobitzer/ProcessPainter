@@ -105,6 +105,8 @@ def run_eval(args):
     controlnet_image_index=args.controlnet_image_index
     
     output_path = Path(output_directory, split)
+    # Clean out path
+    shutil.rmtree(output_path, ignore_errors=True)
     input_path = Path(input_directory, split)
     tmp_dataset_path = Path(temp_dir, split, "dataset")
     tmp_config_path = Path(temp_dir, split, "config.yaml")
