@@ -10,7 +10,7 @@
 #SBATCH -o slurm_log/slurm-%j.out
 #SBATCH -e slurm_log/slurm-%j.err
 
-conda activat animatediff
+conda activate animatediff
 
 SPLIT="test"
 DATASET_DIR="${1%/}"
