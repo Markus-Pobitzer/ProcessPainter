@@ -14,6 +14,7 @@ from eval.img_utils import pil_resize, undo_pil_resize
 from io import BytesIO
 import pickle
 import glob
+import re
 
 
 def process_images(input_path, output_path, controlnet_image_index: int = 7, width: int = 512, height: int = 512) -> List[Dict[str, Any]]:
@@ -82,7 +83,19 @@ def get_latest_sample_subdirs(base_path="samples"):
         if os.path.isdir(os.path.join(selected_dir, name))
     ]
 
-    return subdirs
+    # Oreder them numerically based on the number in the last subdir
+    rx = re.compile(r'^(\d+)-')
+    def key_func(p: str):
+        # take only the last path component and strip trailing slashes
+        base = os.path.basename(p.rstrip('/'))
+        m = rx.match(base)
+        if not m:
+            # No leading number: put these at the end
+            return (float('inf'), base)
+        num_str = m.group(1)
+        return int(num_str)
+
+    return sorted(subdirs, key=key_func)
 
 def run_eval(args):
     input_directory=args.input_directory
