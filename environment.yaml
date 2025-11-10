@@ -2,12 +2,14 @@ name: animatediff
 channels:
   - pytorch
   - nvidia
+  - conda-forge
 dependencies:
   - python=3.10
   - pytorch=1.13.1
   - torchvision=0.14.1
   - torchaudio=0.13.1
   - pytorch-cuda=11.7
+  - numpy==1.*
   - pip
   - pip:
     - diffusers==0.29.2
@@ -24,6 +26,5 @@ dependencies:
     - matplotlib
     - peft==0.13.0
     - accelerate==1.0.0
-    - numpy==1.*
     - onnxruntime
     - opencv-python
