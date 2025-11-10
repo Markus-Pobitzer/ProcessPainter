@@ -50,6 +50,7 @@ def create_video_dataset(dataset_path, output_path, split="train", num_frames=8)
                     continue
 
                 video_id_path = os.path.join(output_path, subdir)
+                os.makedirs(video_id_path, exist_ok=True)
                 try:
                     # --- Load frame_data.pkl ---
                     frame_pkl_path = os.path.join(subdir_path, 'frame_data.pkl')
