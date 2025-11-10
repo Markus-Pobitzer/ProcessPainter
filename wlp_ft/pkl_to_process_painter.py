@@ -64,7 +64,7 @@ def create_video_dataset(dataset_path, output_path, split="train", num_frames=8)
                     else:
                         sampled_list = frame_list
                     # Last frame is equal to reference frame
-                    sampled_list += sampled_list[-1]
+                    sampled_list += [sampled_list[-1]]
 
                     # --- Load reference_frame_tags.pkl ---
                     prompt_pkl_path = os.path.join(subdir_path, 'reference_frame_tags.pkl')
