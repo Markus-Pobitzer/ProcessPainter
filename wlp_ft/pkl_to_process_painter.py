@@ -60,7 +60,7 @@ def create_video_dataset(dataset_path, output_path, split="train", sample_num_fr
                     num_frames = len(frame_list)
                     if num_frames > (sample_num_frames - 1):
                         # Calculate evenly spaced indices
-                        indices = np.linspace(0, num_frames, num=(sample_num_frames - 1), dtype=int)
+                        indices = np.linspace(0, num_frames - 1, num=(sample_num_frames - 1), dtype=int)
                         print(indices)
                         sampled_list = [frame_list[i] for i in indices]
                     else:
