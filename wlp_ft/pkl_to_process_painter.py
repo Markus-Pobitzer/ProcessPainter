@@ -61,14 +61,11 @@ def create_video_dataset(dataset_path, output_path, split="train", sample_num_fr
                     if num_frames > (sample_num_frames - 1):
                         # Calculate evenly spaced indices
                         indices = np.linspace(0, num_frames - 1, num=(sample_num_frames - 1), dtype=int)
-                        print(indices)
                         sampled_list = [frame_list[i] for i in indices]
                     else:
                         sampled_list = frame_list
                     # Last frame is equal to reference frame
-                    print(len(sampled_list))
                     sampled_list += [sampled_list[-1]]
-                    print(len(sampled_list))
 
                     # --- Load reference_frame_tags.pkl ---
                     prompt_pkl_path = os.path.join(subdir_path, 'reference_frame_tags.pkl')
