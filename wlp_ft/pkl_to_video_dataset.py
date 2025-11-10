@@ -5,7 +5,7 @@ import csv
 import cv2
 import numpy as np
 import argparse
-
+from io import BytesIO
 
 def create_video_dataset(dataset_path, output_path, split="train", fps=10, max_frames=50):
     """
@@ -51,7 +51,7 @@ def create_video_dataset(dataset_path, output_path, split="train", fps=10, max_f
                     # --- Load frame_data.pkl ---
                     frame_pkl_path = os.path.join(subdir_path, 'frame_data.pkl')
                     with open(frame_pkl_path, 'rb') as f:
-                        frame_list = pickle.load(f) # List[Image]
+                        frame_list = [Image.open(BytesIO(img_bytes)) for img_bytes in pickle.load(f)]
 
                     num_frames = len(frame_list)
                     if num_frames > max_frames:
@@ -77,22 +77,15 @@ def create_video_dataset(dataset_path, output_path, split="train", fps=10, max_f
                     # --- Save sampled_list as .mp4 ---
                     video_output_path = os.path.join(output_path, f"{subdir}.mp4")
                     
-                    print("1")
-                    print(frame_list)
                     
                     # Get dimensions from the first sampled frame
                     first_frame_pil = sampled_list[0]
                     print(np.array(first_frame_pil).shape)
-                    print(np.array(first_frame_pil).shape)
                     height, width = np.array(first_frame_pil).shape[:2]
-                    
-                    print("2")
                     
                     # Define the codec and create VideoWriter object
                     fourcc = cv2.VideoWriter_fourcc(*'mp4v') # Codec for .mp4
                     video_writer = cv2.VideoWriter(video_output_path, fourcc, fps, (width, height))
-                    
-                    print("3")
 
                     # Write the sampled frames
                     for frame_pil in sampled_list:
@@ -101,8 +94,6 @@ def create_video_dataset(dataset_path, output_path, split="train", fps=10, max_f
                         video_writer.write(frame_bgr)
                     
                     video_writer.release()
-                    
-                    print("4")
 
                     # --- Write metadata to .csv ---
                     video_id = subdir
