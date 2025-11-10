@@ -1,19 +1,20 @@
 import os, io, csv, math, random
 import numpy as np
 from einops import rearrange
-from decord import VideoReader
+from decord import VideoReader, cpu
 
 import torch
 import torchvision.transforms as transforms
 from torch.utils.data.dataset import Dataset
 from animatediff.utils.util import zero_rank_print
+from typing import List
 
 
 
 class WebVid10M(Dataset):
     def __init__(
             self,
-            csv_path, video_folder,
+            csv_path, video_folder, control_indexes: List[int] = [],
             sample_size=256, sample_stride=4, sample_n_frames=16,
             is_image=False,
         ):
@@ -27,6 +28,7 @@ class WebVid10M(Dataset):
         self.sample_stride   = sample_stride
         self.sample_n_frames = sample_n_frames
         self.is_image        = is_image
+        self.control_indexes = control_indexes
         
         sample_size = tuple(sample_size) if not isinstance(sample_size, int) else (sample_size, sample_size)
         self.pixel_transforms = transforms.Compose([
@@ -36,7 +38,7 @@ class WebVid10M(Dataset):
             transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5], inplace=True),
         ])
     
-    def get_batch(self, idx):
+    def og_get_batch(self, idx):
         video_dict = self.dataset[idx]
         videoid, name, page_dir = video_dict['videoid'], video_dict['name'], video_dict['page_dir']
         
@@ -56,6 +58,75 @@ class WebVid10M(Dataset):
         del video_reader
 
         if self.is_image:
+            pixel_values = pixel_values[0]
+        
+        return pixel_values, name
+    
+    def get_batch(self, idx):
+        """
+        Fetches and processes a video from the dataset.
+        
+        The video sampling logic (for `if not self.is_image`) has been
+        rewritten to evenly sample `self.sample_n_frames` frames,
+        always including the first and last frames.
+        """
+        video_dict = self.dataset[idx]
+        videoid, name = video_dict['videoid'], video_dict['name']
+        
+        video_dir = os.path.join(self.video_folder, f"{videoid}.mp4")
+        
+        # Check if file exists before opening
+        if not os.path.exists(video_dir):
+            print(f"Warning: Video file not found {video_dir}")
+            # Return empty tensors or handle as appropriate
+            # Returning None for simplicity
+            return None, None 
+
+        try:
+            video_reader = VideoReader(video_dir, ctx=cpu(0))
+        except Exception as e:
+            print(f"Error opening video {video_dir}: {e}")
+            return None, None
+            
+        video_length = len(video_reader)
+        
+        if video_length == 0:
+            print(f"Warning: Video has 0 length {video_dir}")
+            del video_reader
+            return None, None
+
+        if not self.is_image:
+            indices = np.linspace(
+                0,                 # Start frame
+                video_length - 1,  # End frame
+                self.sample_n_frames, # Number of frames to sample
+                dtype=int
+            )
+            batch_index = list(indices)
+        else:
+            batch_index = [random.randint(0, video_length - 1)]
+
+        batch_data = video_reader.get_batch(batch_index)
+        
+        # Check if data is numpy, if not, convert
+        if not isinstance(batch_data, np.ndarray):
+            try:
+                # Try to call asnumpy() if it exists
+                batch_data = batch_data.asnumpy()
+            except AttributeError:
+                raise TypeError("VideoReader.get_batch did not return a numpy array"
+                                " and has no .asnumpy() method.")
+
+        # (N_frames, H, W, C) -> (N_frames, C, H, W)
+        pixel_values = torch.from_numpy(batch_data).permute(0, 3, 1, 2).contiguous()
+        
+        # Normalize to [0, 1]
+        pixel_values = pixel_values / 255.
+        
+        del video_reader
+
+        if self.is_image:
+            # If it's an image, remove the frames dimension
             pixel_values = pixel_values[0]
         
         return pixel_values, name
