@@ -106,6 +106,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     print("Processing train split...")
-    create_video_dataset(args.dataset_directory, args.output_directory, split="train", fps=10)
+    create_video_dataset(args.dataset_directory, args.output_directory, split="train")
     
     print("Dataset creation complete.")
