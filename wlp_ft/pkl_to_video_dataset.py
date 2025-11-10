@@ -64,15 +64,12 @@ def create_video_dataset(dataset_path, output_path, split="train", fps=10, max_f
                         # Use all frames if max_frames or fewer
                         sampled_list = frame_list
                     # --- End of NEW ---
-                    
-                    print(f"Len frame list: {len(sampled_list)}")
+
 
                     # --- Load reference_frame_tags.pkl ---
                     prompt_pkl_path = os.path.join(subdir_path, 'reference_frame_tags.pkl')
                     with open(prompt_pkl_path, 'rb') as f:
                         prompt_list = pickle.load(f) # List[str]
-                        
-                    print(prompt_list)
 
                     # Ensure we have data (checking the sampled list)
                     if not sampled_list:
@@ -85,13 +82,19 @@ def create_video_dataset(dataset_path, output_path, split="train", fps=10, max_f
                     # --- Save sampled_list as .mp4 ---
                     video_output_path = os.path.join(output_path, f"{subdir}.mp4")
                     
+                    print("1")
+                    
                     # Get dimensions from the first sampled frame
                     first_frame_pil = sampled_list[0]
                     height, width = np.array(first_frame_pil).shape[:2]
                     
+                    print("2")
+                    
                     # Define the codec and create VideoWriter object
                     fourcc = cv2.VideoWriter_fourcc(*'mp4v') # Codec for .mp4
                     video_writer = cv2.VideoWriter(video_output_path, fourcc, fps, (width, height))
+                    
+                    print("3")
 
                     # Write the sampled frames
                     for frame_pil in sampled_list:
@@ -100,6 +103,8 @@ def create_video_dataset(dataset_path, output_path, split="train", fps=10, max_f
                         video_writer.write(frame_bgr)
                     
                     video_writer.release()
+                    
+                    print("4")
 
                     # --- Write metadata to .csv ---
                     video_id = subdir
