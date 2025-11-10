@@ -53,18 +53,13 @@ def create_video_dataset(dataset_path, output_path, split="train", fps=10, max_f
                     with open(frame_pkl_path, 'rb') as f:
                         frame_list = pickle.load(f) # List[Image]
 
-                    # --- NEW: Evenly sample max max_frames frames ---
                     num_frames = len(frame_list)
                     if num_frames > max_frames:
                         # Calculate evenly spaced indices
                         indices = np.linspace(0, num_frames - 1, num=max_frames, dtype=int)
-                        # Select frames based on indices
                         sampled_list = [frame_list[i] for i in indices]
                     else:
-                        # Use all frames if max_frames or fewer
                         sampled_list = frame_list
-                    # --- End of NEW ---
-
 
                     # --- Load reference_frame_tags.pkl ---
                     prompt_pkl_path = os.path.join(subdir_path, 'reference_frame_tags.pkl')
@@ -83,6 +78,7 @@ def create_video_dataset(dataset_path, output_path, split="train", fps=10, max_f
                     video_output_path = os.path.join(output_path, f"{subdir}.mp4")
                     
                     print("1")
+                    print(frame_list)
                     
                     # Get dimensions from the first sampled frame
                     first_frame_pil = sampled_list[0]
