@@ -29,10 +29,10 @@ noise_scheduler_kwargs:
   clip_sample:         false
 
 train_data:
-  csv_path:        "data/wlp.csv"
-  video_folder:    "data/wlp"
-  image_folder: "data/wlp_frames"
-  sample_size:     256
+  csv_path:        "video_as_videos_combined/wlp_train.csv"
+  video_folder:    "video_as_videos_combined/"
+  image_folder: "video_as_videos_combined/"
+  sample_size:     512
   sample_stride:   4
   sample_n_frames: 8
   video_reversed: false
