@@ -86,6 +86,8 @@ def create_video_dataset(dataset_path, output_path, split="train", fps=10, max_f
                     
                     # Get dimensions from the first sampled frame
                     first_frame_pil = sampled_list[0]
+                    print(np.array(first_frame_pil).shape)
+                    print(np.array(first_frame_pil).shape)
                     height, width = np.array(first_frame_pil).shape[:2]
                     
                     print("2")
