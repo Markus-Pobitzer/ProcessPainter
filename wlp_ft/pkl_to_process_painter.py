@@ -7,7 +7,7 @@ import numpy as np
 import argparse
 from io import BytesIO
 
-def create_video_dataset(dataset_path, output_path, split="train", num_frames=8):
+def create_video_dataset(dataset_path, output_path, split="train", sample_num_frames=8):
     """
     Converts a dataset of pickled frames into .mp4 videos and a metadata .csv file.
     Samples at most max_frames frames evenly for each video.
@@ -58,9 +58,9 @@ def create_video_dataset(dataset_path, output_path, split="train", num_frames=8)
                         frame_list = [Image.open(BytesIO(img_bytes)) for img_bytes in pickle.load(f)]
 
                     num_frames = len(frame_list)
-                    if num_frames > num_frames - 1:
+                    if num_frames > sample_num_frames - 1:
                         # Calculate evenly spaced indices
-                        indices = np.linspace(0, num_frames - 1, num=(num_frames - 1), dtype=int)
+                        indices = np.linspace(0, num_frames, num=(sample_num_frames - 1), dtype=int)
                         sampled_list = [frame_list[i] for i in indices]
                     else:
                         sampled_list = frame_list
@@ -80,7 +80,7 @@ def create_video_dataset(dataset_path, output_path, split="train", num_frames=8)
                         print(f"Skipping {subdir}: No prompt (tags) found.")
                         continue
 
-                    # --- Save sampled_list as .mp4 ---
+                    # --- Save sampled_list as .jpg ---
                     for idx, img in enumerate(sampled_list):
                         img.save(os.path.join(video_id_path, f"{idx}.jpg"))
 
