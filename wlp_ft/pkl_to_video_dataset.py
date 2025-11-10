@@ -7,7 +7,7 @@ import numpy as np
 import argparse
 
 
-def create_video_dataset(dataset_path, output_path, split="test", fps=10, max_frames=50):
+def create_video_dataset(dataset_path, output_path, split="train", fps=10, max_frames=50):
     """
     Converts a dataset of pickled frames into .mp4 videos and a metadata .csv file.
     Samples at most max_frames frames evenly for each video.
@@ -64,11 +64,15 @@ def create_video_dataset(dataset_path, output_path, split="test", fps=10, max_fr
                         # Use all frames if max_frames or fewer
                         sampled_list = frame_list
                     # --- End of NEW ---
+                    
+                    print(f"Len frame list: {len(sampled_list)}")
 
                     # --- Load reference_frame_tags.pkl ---
                     prompt_pkl_path = os.path.join(subdir_path, 'reference_frame_tags.pkl')
                     with open(prompt_pkl_path, 'rb') as f:
                         prompt_list = pickle.load(f) # List[str]
+                        
+                    print(prompt_list)
 
                     # Ensure we have data (checking the sampled list)
                     if not sampled_list:
@@ -119,8 +123,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     
-    # Process the 'test' split
-    print("Processing test split...")
-    create_video_dataset(args.dataset_directory, args.output_directory, split="test", fps=10)
+    print("Processing train split...")
+    create_video_dataset(args.dataset_directory, args.output_directory, split="train", fps=10)
     
     print("Dataset creation complete.")
