@@ -34,7 +34,6 @@ train_data:
   sample_size:     512
   sample_stride:   4
   sample_n_frames: 8
-  video_reversed: false
 
 validation_data:
   prompts:
