@@ -29,8 +29,8 @@ noise_scheduler_kwargs:
   clip_sample:         false
 
 train_data:
-  csv_path:        "video_as_videos_combined/wlp_train.csv"
-  video_folder:    "video_as_videos_combined/"
+  csv_path:        "data/video_as_pkl_combined/train/wlp_train.csv"
+  video_folder:    "data/video_as_pkl_combined/"
   sample_size:     512
   sample_stride:   4
   sample_n_frames: 8

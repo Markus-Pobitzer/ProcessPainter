@@ -1,8 +1,6 @@
 import os, io, csv, math, random
+from PIL import Image
 import numpy as np
-from einops import rearrange
-from decord import VideoReader, cpu
-
 import torch
 import torchvision.transforms as transforms
 from torch.utils.data.dataset import Dataset
@@ -16,7 +14,7 @@ class WebVid10M(Dataset):
             self,
             csv_path, video_folder, control_indexes: List[int] = [],
             sample_size=256, sample_stride=4, sample_n_frames=16,
-            is_image=False,
+            is_image=False, split:str = "train"
         ):
         zero_rank_print(f"loading annotations from {csv_path} ...")
         with open(csv_path, 'r') as csvfile:
@@ -29,6 +27,7 @@ class WebVid10M(Dataset):
         self.sample_n_frames = sample_n_frames
         self.is_image        = is_image
         self.control_indexes = control_indexes
+        self.split = split
         
         sample_size = tuple(sample_size) if not isinstance(sample_size, int) else (sample_size, sample_size)
         self.pixel_transforms = transforms.Compose([
@@ -37,30 +36,6 @@ class WebVid10M(Dataset):
             transforms.CenterCrop(sample_size),
             transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5], inplace=True),
         ])
-    
-    def og_get_batch(self, idx):
-        video_dict = self.dataset[idx]
-        videoid, name, page_dir = video_dict['videoid'], video_dict['name'], video_dict['page_dir']
-        
-        video_dir    = os.path.join(self.video_folder, f"{videoid}.mp4")
-        video_reader = VideoReader(video_dir)
-        video_length = len(video_reader)
-        
-        if not self.is_image:
-            clip_length = min(video_length, (self.sample_n_frames - 1) * self.sample_stride + 1)
-            start_idx   = random.randint(0, video_length - clip_length)
-            batch_index = np.linspace(start_idx, start_idx + clip_length - 1, self.sample_n_frames, dtype=int)
-        else:
-            batch_index = [random.randint(0, video_length - 1)]
-
-        pixel_values = torch.from_numpy(video_reader.get_batch(batch_index).asnumpy()).permute(0, 3, 1, 2).contiguous()
-        pixel_values = pixel_values / 255.
-        del video_reader
-
-        if self.is_image:
-            pixel_values = pixel_values[0]
-        
-        return pixel_values, name
     
     def get_batch(self, idx):
         """
@@ -73,63 +48,30 @@ class WebVid10M(Dataset):
         video_dict = self.dataset[idx]
         videoid, name = video_dict['videoid'], video_dict['name']
         
-        video_dir = os.path.join(self.video_folder, f"{videoid}.mp4")
+        video_dir = os.path.join(self.video_folder, self.split, videoid)
         
         # Check if file exists before opening
         if not os.path.exists(video_dir):
             print(f"Warning: Video file not found {video_dir}")
             # Return empty tensors or handle as appropriate
             # Returning None for simplicity
-            return None, None 
-
-        try:
-            video_reader = VideoReader(video_dir, ctx=cpu(0))
-        except Exception as e:
-            print(f"Error opening video {video_dir}: {e}")
-            return None, None
-            
-        video_length = len(video_reader)
+            raise ValueError()
         
-        if video_length == 0:
-            print(f"Warning: Video has 0 length {video_dir}")
-            del video_reader
-            return None, None
+        final_idx = self.sample_n_frames - 1
+        image = os.path.join(video_dir, f"{final_idx}.jpg")
+        image_list = []
+        for img_idx in range(self.sample_n_frames - 1):
+            image_list.append(Image.open(os.path.join(video_dir, f"{img_idx}.jpg")))
 
-        if not self.is_image:
-            indices = np.linspace(
-                0,                 # Start frame
-                video_length - 1,  # End frame
-                self.sample_n_frames, # Number of frames to sample
-                dtype=int
-            )
-            batch_index = list(indices)
-        else:
-            batch_index = [random.randint(0, video_length - 1)]
-
-        batch_data = video_reader.get_batch(batch_index)
+        batch_data = np.array(image_list)
         
-        # Check if data is numpy, if not, convert
-        if not isinstance(batch_data, np.ndarray):
-            try:
-                # Try to call asnumpy() if it exists
-                batch_data = batch_data.asnumpy()
-            except AttributeError:
-                raise TypeError("VideoReader.get_batch did not return a numpy array"
-                                " and has no .asnumpy() method.")
-
         # (N_frames, H, W, C) -> (N_frames, C, H, W)
         pixel_values = torch.from_numpy(batch_data).permute(0, 3, 1, 2).contiguous()
         
         # Normalize to [0, 1]
         pixel_values = pixel_values / 255.
         
-        del video_reader
-
-        if self.is_image:
-            # If it's an image, remove the frames dimension
-            pixel_values = pixel_values[0]
-        
-        return pixel_values, name
+        return pixel_values, name, image
 
     def __len__(self):
         return self.length
@@ -137,14 +79,14 @@ class WebVid10M(Dataset):
     def __getitem__(self, idx):
         while True:
             try:
-                pixel_values, name = self.get_batch(idx)
+                pixel_values, name, image = self.get_batch(idx)
                 break
 
             except Exception as e:
                 idx = random.randint(0, self.length-1)
 
         pixel_values = self.pixel_transforms(pixel_values)
-        sample = dict(pixel_values=pixel_values, text=name)
+        sample = dict(pixel_values=pixel_values, text=name, image=image)
         return sample
 
 
