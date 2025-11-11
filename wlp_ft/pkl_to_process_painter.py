@@ -2,7 +2,6 @@ from PIL import Image
 import os
 import pickle
 import csv
-import cv2
 import numpy as np
 import argparse
 from io import BytesIO
