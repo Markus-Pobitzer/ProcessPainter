@@ -262,6 +262,8 @@ def prepare_control(controlnet, controlnet_images_paths, timesteps, controlnet_n
     controlnet_conditioning_mask_shape[1] = 1
     controlnet_conditioning_mask          = torch.zeros(controlnet_conditioning_mask_shape).to(controlnet_noisy_latents.device)
 
+    print("controlnet_cond", controlnet_cond.shape)
+    print("controlnet_image_indexs", controlnet_image_indexs)
     # assert controlnet_images.shape[2] >= len(controlnet_image_indexs)
     controlnet_cond[:,:,controlnet_image_indexs] = controlnet_images
     controlnet_conditioning_mask[:,:,controlnet_image_indexs] = 1
