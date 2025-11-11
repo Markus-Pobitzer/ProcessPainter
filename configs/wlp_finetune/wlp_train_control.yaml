@@ -86,7 +86,7 @@ enable_ipa: false
 controlnet_image_indexes: [7]
 controlnet_config: "configs/inference/sparsectrl/latent_condition_32.yaml"
 # Not sure if we should keep it empty
-controlnet_path:   "models/ReferenceNet/speedpainting.ckpt"
+# controlnet_path:   "models/ReferenceNet/speedpainting.ckpt"
 controlnet_conditioning_scale: 1
 random_indexes: true
 
