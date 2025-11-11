@@ -57,11 +57,15 @@ class WebVid10M(Dataset):
             # Returning None for simplicity
             raise ValueError()
         
-        final_idx = self.sample_n_frames - 1
-        image = os.path.join(video_dir, f"{final_idx}.jpg")
+        image: List[str] = []
         image_list = []
         for img_idx in range(self.sample_n_frames - 1):
-            image_list.append(Image.open(os.path.join(video_dir, f"{img_idx}.jpg")))
+            i_p = os.path.join(video_dir, f"{img_idx}.jpg")
+            image_list.append(Image.open(i_p))
+            image.append(i_p)
+
+        final_idx = self.sample_n_frames - 1
+        image.append(os.path.join(video_dir, f"{final_idx}.jpg"))
 
         batch_data = np.array(image_list)
         
