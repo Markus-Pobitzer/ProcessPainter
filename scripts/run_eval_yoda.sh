@@ -10,6 +10,10 @@
 #SBATCH -o slurm_log/slurm-%j.out
 #SBATCH -e slurm_log/slurm-%j.err
 
+# !! NOTE:
+# 1. activate env
+# 2. sbatch ths script
+
 conda activate animatediff
 
 SPLIT="test"
